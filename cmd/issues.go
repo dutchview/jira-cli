@@ -170,6 +170,9 @@ func (c *IssuesGetCmd) Run(client *api.Client) error {
 	if len(issue.Fields.Labels) > 0 {
 		fmt.Printf("Labels: %s\n", strings.Join(issue.Fields.Labels, ", "))
 	}
+	if issue.Fields.DueDate != "" {
+		fmt.Printf("Due Date: %s\n", issue.Fields.DueDate)
+	}
 
 	fmt.Printf("Created: %s\n", formatTimestamp(issue.Fields.Created))
 	fmt.Printf("Updated: %s\n", formatTimestamp(issue.Fields.Updated))
@@ -214,6 +217,7 @@ type IssuesCreateCmd struct {
 	Priority    string `help:"Priority (Highest, High, Medium, Low, Lowest)"`
 	Assignee    string `short:"a" help:"Assignee account ID"`
 	Labels      string `short:"l" help:"Comma-separated labels"`
+	DueDate     string `help:"Due date (YYYY-MM-DD)"`
 	JSON        bool   `short:"j" help:"Output as JSON"`
 }
 
@@ -231,7 +235,7 @@ func (c *IssuesCreateCmd) Run(client *api.Client) error {
 		}
 	}
 
-	issue, err := client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels)
+	issue, err := client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels, c.DueDate)
 	if err != nil {
 		return err
 	}
@@ -257,6 +261,8 @@ type IssuesUpdateCmd struct {
 	Assignee    string `short:"a" help:"New assignee account ID"`
 	Unassign    bool   `help:"Remove assignee"`
 	Labels      string `short:"l" help:"New comma-separated labels"`
+	DueDate     string `help:"Due date (YYYY-MM-DD)"`
+	NoDueDate   bool   `help:"Remove due date"`
 }
 
 func (c *IssuesUpdateCmd) Run(client *api.Client) error {
@@ -283,9 +289,14 @@ func (c *IssuesUpdateCmd) Run(client *api.Client) error {
 		}
 		fields["labels"] = labels
 	}
+	if c.NoDueDate {
+		fields["duedate"] = nil
+	} else if c.DueDate != "" {
+		fields["duedate"] = c.DueDate
+	}
 
 	if len(fields) == 0 {
-		return fmt.Errorf("no fields to update (use --summary, --description, --priority, --assignee, --unassign, or --labels)")
+		return fmt.Errorf("no fields to update (use --summary, --description, --priority, --assignee, --unassign, --labels, or --due-date)")
 	}
 
 	if err := client.UpdateIssue(c.IssueKey, fields); err != nil {

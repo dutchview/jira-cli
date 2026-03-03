@@ -110,6 +110,7 @@ type IssueFields struct {
 	Reporter    *User                  `json:"reporter,omitempty"`
 	Created     string                 `json:"created,omitempty"`
 	Updated     string                 `json:"updated,omitempty"`
+	DueDate     string                 `json:"duedate,omitempty"`
 	Labels      []string               `json:"labels,omitempty"`
 	Project     *Project               `json:"project,omitempty"`
 	Comment     *CommentPage           `json:"comment,omitempty"`
@@ -212,7 +213,7 @@ func (c *Client) GetIssue(issueKey string, fields []string, expand []string) (*I
 	return &issue, nil
 }
 
-func (c *Client) CreateIssue(projectKey, summary, issueType string, description map[string]interface{}, priority, assignee string, labels []string) (*Issue, error) {
+func (c *Client) CreateIssue(projectKey, summary, issueType string, description map[string]interface{}, priority, assignee string, labels []string, dueDate string) (*Issue, error) {
 	fields := map[string]interface{}{
 		"project":   map[string]string{"key": projectKey},
 		"summary":   summary,
@@ -230,6 +231,9 @@ func (c *Client) CreateIssue(projectKey, summary, issueType string, description 
 	}
 	if len(labels) > 0 {
 		fields["labels"] = labels
+	}
+	if dueDate != "" {
+		fields["duedate"] = dueDate
 	}
 
 	payload := map[string]interface{}{"fields": fields}

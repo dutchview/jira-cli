@@ -55,12 +55,15 @@ jira issues get ED-123 --json
 # Create issue
 jira issues create -p ED -t Task -s "Fix the login bug"
 jira issues create -p ED -t Bug -s "Crash on save" -d "Steps to reproduce: ..."
+jira issues create -p ED -t Task -s "Deadline task" --due-date 2026-03-15
 
 # Update issue
 jira issues update ED-123 -s "Updated title"
 jira issues update ED-123 -d "New description with **markdown**"
 jira issues update ED-123 -a <account-id>
 jira issues update ED-123 --unassign
+jira issues update ED-123 --due-date 2026-04-01
+jira issues update ED-123 --no-due-date
 
 # Delete issue
 jira issues delete ED-123
