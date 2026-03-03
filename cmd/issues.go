@@ -220,7 +220,7 @@ type IssuesCreateCmd struct {
 func (c *IssuesCreateCmd) Run(client *api.Client) error {
 	var description map[string]interface{}
 	if c.Description != "" {
-		description = adf.MarkdownToADF(c.Description)
+		description = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
 	}
 
 	var labels []string
@@ -266,7 +266,7 @@ func (c *IssuesUpdateCmd) Run(client *api.Client) error {
 		fields["summary"] = c.Summary
 	}
 	if c.Description != "" {
-		fields["description"] = adf.MarkdownToADF(c.Description)
+		fields["description"] = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
 	}
 	if c.Priority != "" {
 		fields["priority"] = map[string]string{"name": c.Priority}

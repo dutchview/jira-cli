@@ -3,7 +3,12 @@ package adf
 import (
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
+
+// MentionResolver resolves a display name to a JIRA account ID.
+// Returns accountID, displayName, and whether the user was found.
+type MentionResolver func(name string) (accountID, displayName string, found bool)
 
 var (
 	headingRe    = regexp.MustCompile(`^(#{1,6})\s+(.+)$`)
@@ -13,10 +18,18 @@ var (
 	ruleRe       = regexp.MustCompile(`^(-{3,}|\*{3,}|_{3,})$`)
 	separatorRe  = regexp.MustCompile(`^:?-+:?$`)
 
+	// mentionBoundary characters that cannot be part of a display name.
+	mentionBoundary = "@,;!?:()[]{}#*`\n"
 )
 
 // MarkdownToADF converts markdown-formatted text to an ADF document.
 func MarkdownToADF(text string) map[string]interface{} {
+	return MarkdownToADFWithMentions(text, nil)
+}
+
+// MarkdownToADFWithMentions converts markdown-formatted text to an ADF document,
+// resolving @mentions to JIRA mention nodes using the provided resolver.
+func MarkdownToADFWithMentions(text string, resolve MentionResolver) map[string]interface{} {
 	lines := strings.Split(text, "\n")
 	var content []ADFNode
 	i := 0
@@ -60,7 +73,7 @@ func MarkdownToADF(text string) map[string]interface{} {
 			var items []ADFNode
 			for i < len(lines) && bulletRe.MatchString(lines[i]) {
 				itemText := bulletRe.ReplaceAllString(lines[i], "")
-				inlineNodes := parseInlineMarkdown(itemText)
+				inlineNodes := parseInlineMarkdown(itemText, resolve)
 				items = append(items, ListItem(Paragraph(inlineNodes...)))
 				i++
 			}
@@ -73,7 +86,7 @@ func MarkdownToADF(text string) map[string]interface{} {
 			var items []ADFNode
 			for i < len(lines) && orderedRe.MatchString(lines[i]) {
 				itemText := orderedRe.ReplaceAllString(lines[i], "")
-				inlineNodes := parseInlineMarkdown(itemText)
+				inlineNodes := parseInlineMarkdown(itemText, resolve)
 				items = append(items, ListItem(Paragraph(inlineNodes...)))
 				i++
 			}
@@ -89,7 +102,7 @@ func MarkdownToADF(text string) map[string]interface{} {
 				i++
 			}
 			if len(tableLines) >= 2 {
-				content = append(content, parseTable(tableLines))
+				content = append(content, parseTable(tableLines, resolve))
 			}
 			continue
 		}
@@ -122,7 +135,7 @@ func MarkdownToADF(text string) map[string]interface{} {
 
 		if len(paraLines) > 0 {
 			paraText := strings.Join(paraLines, "\n")
-			inlineNodes := parseInlineMarkdown(paraText)
+			inlineNodes := parseInlineMarkdown(paraText, resolve)
 			content = append(content, Paragraph(inlineNodes...))
 		}
 	}
@@ -130,10 +143,10 @@ func MarkdownToADF(text string) map[string]interface{} {
 	return Doc(content...)
 }
 
-// parseInlineMarkdown parses inline formatting (bold, italic, code, links)
+// parseInlineMarkdown parses inline formatting (bold, italic, code, links, @mentions)
 // and returns a slice of ADFNodes.
 // Uses a manual scanner since Go's regexp doesn't support lookbehind.
-func parseInlineMarkdown(text string) []ADFNode {
+func parseInlineMarkdown(text string, resolve MentionResolver) []ADFNode {
 	var nodes []ADFNode
 	i := 0
 	buf := ""
@@ -147,6 +160,39 @@ func parseInlineMarkdown(text string) []ADFNode {
 
 	for i < len(text) {
 		ch := text[i]
+
+		// @mention
+		if ch == '@' && resolve != nil && i+1 < len(text) {
+			// Extract candidate: text after @ until a boundary character
+			end := i + 1
+			for end < len(text) && !strings.ContainsRune(mentionBoundary, rune(text[end])) {
+				end++
+			}
+			candidate := strings.TrimRight(text[i+1:end], " \t.")
+
+			// Try progressively shorter candidates (remove last word each time)
+			matched := false
+			for candidate != "" {
+				accountID, displayName, found := resolve(candidate)
+				if found {
+					flushBuf()
+					nodes = append(nodes, MentionNode(accountID, displayName))
+					// Advance past the matched name
+					i = i + 1 + len(candidate)
+					matched = true
+					break
+				}
+				// Remove last word and try again
+				lastSpace := strings.LastIndex(candidate, " ")
+				if lastSpace <= 0 {
+					break
+				}
+				candidate = candidate[:lastSpace]
+			}
+			if matched {
+				continue
+			}
+		}
 
 		// ** bold **
 		if ch == '*' && i+1 < len(text) && text[i+1] == '*' {
@@ -230,8 +276,10 @@ func parseInlineMarkdown(text string) []ADFNode {
 			}
 		}
 
-		buf += string(ch)
-		i++
+		// Consume full UTF-8 rune to avoid breaking multi-byte characters (e.g. —, é, ñ)
+		_, size := utf8.DecodeRuneInString(text[i:])
+		buf += text[i : i+size]
+		i += size
 	}
 
 	flushBuf()
@@ -259,7 +307,7 @@ func textWithBreaks(text string) []ADFNode {
 }
 
 // parseTable parses markdown table lines into an ADF table node.
-func parseTable(tableLines []string) ADFNode {
+func parseTable(tableLines []string, resolve MentionResolver) ADFNode {
 	parseRow := func(line string) []string {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "|") {
@@ -301,7 +349,7 @@ func parseTable(tableLines []string) ADFNode {
 	// Build header row
 	var headerCells []ADFNode
 	for _, h := range headers {
-		inlineNodes := parseInlineMarkdown(h)
+		inlineNodes := parseInlineMarkdown(h, resolve)
 		headerCells = append(headerCells, TableHeader(Paragraph(inlineNodes...)))
 	}
 	headerRow := TableRow(headerCells...)
@@ -321,7 +369,7 @@ func parseTable(tableLines []string) ADFNode {
 
 		var tableCells []ADFNode
 		for _, cell := range cells {
-			inlineNodes := parseInlineMarkdown(cell)
+			inlineNodes := parseInlineMarkdown(cell, resolve)
 			tableCells = append(tableCells, TableCell(Paragraph(inlineNodes...)))
 		}
 		dataRows = append(dataRows, TableRow(tableCells...))

@@ -84,7 +84,7 @@ func (c *CommentsAddCmd) Run(client *api.Client) error {
 		return fmt.Errorf("comment text is required (provide as argument or via --file)")
 	}
 
-	adfBody := adf.MarkdownToADF(text)
+	adfBody := adf.MarkdownToADFWithMentions(text, newMentionResolver(client))
 
 	comment, err := client.AddComment(c.IssueKey, adfBody)
 	if err != nil {
@@ -109,7 +109,7 @@ type CommentsUpdateCmd struct {
 }
 
 func (c *CommentsUpdateCmd) Run(client *api.Client) error {
-	adfBody := adf.MarkdownToADF(c.Text)
+	adfBody := adf.MarkdownToADFWithMentions(c.Text, newMentionResolver(client))
 
 	comment, err := client.UpdateComment(c.IssueKey, c.CommentID, adfBody)
 	if err != nil {

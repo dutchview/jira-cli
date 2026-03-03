@@ -90,6 +90,17 @@ func Link(text, href string) ADFNode {
 	return TextNode(text, Mark{Type: "link", Attrs: map[string]interface{}{"href": href}})
 }
 
+func MentionNode(accountID, displayName string) ADFNode {
+	return ADFNode{
+		Type: "mention",
+		Attrs: map[string]interface{}{
+			"id":          accountID,
+			"text":        "@" + displayName,
+			"accessLevel": "",
+		},
+	}
+}
+
 func HardBreak() ADFNode {
 	return ADFNode{Type: "hardBreak"}
 }

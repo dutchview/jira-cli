@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mauricejumelet/jira-cli/internal/adf"
+	"github.com/mauricejumelet/jira-cli/internal/api"
 )
 
 func printJSON(v interface{}) error {
@@ -47,4 +50,44 @@ func makeHyperlink(url, text string) string {
 
 func issueURL(baseURL, issueKey string) string {
 	return strings.TrimRight(baseURL, "/") + "/browse/" + issueKey
+}
+
+// newMentionResolver creates a MentionResolver that looks up JIRA users by display name.
+func newMentionResolver(client *api.Client) adf.MentionResolver {
+	// Cache resolved names to avoid repeated API calls in the same text.
+	cache := map[string]*resolvedUser{}
+
+	return func(name string) (string, string, bool) {
+		nameLower := strings.ToLower(name)
+
+		// Check cache first
+		if cached, ok := cache[nameLower]; ok {
+			if cached == nil {
+				return "", "", false
+			}
+			return cached.accountID, cached.displayName, true
+		}
+
+		users, err := client.SearchUsers(name, 10)
+		if err != nil {
+			cache[nameLower] = nil
+			return "", "", false
+		}
+
+		// Find exact display name match (case-insensitive)
+		for _, u := range users {
+			if strings.EqualFold(u.DisplayName, name) {
+				cache[nameLower] = &resolvedUser{u.AccountID, u.DisplayName}
+				return u.AccountID, u.DisplayName, true
+			}
+		}
+
+		cache[nameLower] = nil
+		return "", "", false
+	}
+}
+
+type resolvedUser struct {
+	accountID   string
+	displayName string
 }
