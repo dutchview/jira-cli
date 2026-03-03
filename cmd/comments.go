@@ -64,7 +64,7 @@ func (c *CommentsListCmd) Run(client *api.Client) error {
 
 type CommentsAddCmd struct {
 	IssueKey string `arg:"" help:"Issue key (e.g., PROJ-123)"`
-	Text     string `arg:"" optional:"" help:"Comment text (supports markdown)"`
+	Text     string `arg:"" optional:"" help:"Comment text (supports markdown and @mentions)"`
 	File     string `help:"Read comment from file"`
 	JSON     bool   `short:"j" help:"Output as JSON"`
 }
@@ -104,7 +104,7 @@ func (c *CommentsAddCmd) Run(client *api.Client) error {
 type CommentsUpdateCmd struct {
 	IssueKey  string `arg:"" help:"Issue key (e.g., PROJ-123)"`
 	CommentID string `arg:"" help:"Comment ID"`
-	Text      string `arg:"" help:"New comment text (supports markdown)"`
+	Text      string `arg:"" help:"New comment text (supports markdown and @mentions)"`
 	JSON      bool   `short:"j" help:"Output as JSON"`
 }
 

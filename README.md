@@ -112,12 +112,25 @@ Descriptions and comments support Markdown, which is automatically converted to 
 - *Italic* (`*text*`)
 - `Inline code` (`` `code` ``)
 - [Links](url) (`[text](url)`)
+- @mentions (`@Display Name` — resolved to JIRA users automatically)
 - Headings (`# H1` through `###### H6`)
 - Bullet lists (`- item`)
 - Numbered lists (`1. item`)
 - Code blocks (triple backticks with optional language)
 - Tables (pipe syntax)
 - Horizontal rules (`---`)
+
+### @Mentions
+
+Use `@Display Name` in descriptions and comments to mention JIRA users. The CLI resolves display names to JIRA account IDs automatically via user search. Mentions are rendered as proper JIRA mention nodes in the Atlassian Document Format.
+
+```bash
+# Mention a user in a comment
+jira comments add ED-123 "Hey @John Smith, can you review this?"
+
+# Mention in a description
+jira issues create -p ED -t Task -s "Review needed" -d "Assigned to @Jane Doe for review"
+```
 
 ## License
 

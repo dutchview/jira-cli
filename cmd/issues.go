@@ -210,7 +210,7 @@ type IssuesCreateCmd struct {
 	Project     string `short:"p" required:"" help:"Project key (e.g., ED)"`
 	Type        string `short:"t" default:"Task" help:"Issue type (Bug, Task, Story, etc.)"`
 	Summary     string `short:"s" required:"" help:"Issue summary/title"`
-	Description string `short:"d" help:"Issue description (supports markdown)"`
+	Description string `short:"d" help:"Issue description (supports markdown and @mentions)"`
 	Priority    string `help:"Priority (Highest, High, Medium, Low, Lowest)"`
 	Assignee    string `short:"a" help:"Assignee account ID"`
 	Labels      string `short:"l" help:"Comma-separated labels"`
@@ -252,7 +252,7 @@ func (c *IssuesCreateCmd) Run(client *api.Client) error {
 type IssuesUpdateCmd struct {
 	IssueKey    string `arg:"" help:"Issue key (e.g., PROJ-123)"`
 	Summary     string `short:"s" help:"New summary"`
-	Description string `short:"d" help:"New description (supports markdown)"`
+	Description string `short:"d" help:"New description (supports markdown and @mentions)"`
 	Priority    string `help:"New priority"`
 	Assignee    string `short:"a" help:"New assignee account ID"`
 	Unassign    bool   `help:"Remove assignee"`
