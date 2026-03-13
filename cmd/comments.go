@@ -64,7 +64,7 @@ func (c *CommentsListCmd) Run(client *api.Client) error {
 
 type CommentsAddCmd struct {
 	IssueKey string `arg:"" help:"Issue key (e.g., PROJ-123)"`
-	Text     string `arg:"" optional:"" help:"Comment text (supports markdown and @mentions)"`
+	Text     string `arg:"" optional:"" help:"Comment text (supports markdown, @mentions, and inline images (!filename!))"`
 	File     string `help:"Read comment from file"`
 	JSON     bool   `short:"j" help:"Output as JSON"`
 }
@@ -84,9 +84,17 @@ func (c *CommentsAddCmd) Run(client *api.Client) error {
 		return fmt.Errorf("comment text is required (provide as argument or via --file)")
 	}
 
-	adfBody := adf.MarkdownToADFWithMentions(text, newMentionResolver(client))
+	var comment *api.Comment
+	var err error
 
-	comment, err := client.AddComment(c.IssueKey, adfBody)
+	if adf.ContainsInlineImages(text) {
+		// Use v2 API with wiki markup for inline image support
+		wikiBody := adf.MarkdownToWiki(text)
+		comment, err = client.AddCommentWiki(c.IssueKey, wikiBody)
+	} else {
+		adfBody := adf.MarkdownToADFWithMentions(text, newMentionResolver(client))
+		comment, err = client.AddComment(c.IssueKey, adfBody)
+	}
 	if err != nil {
 		return err
 	}
@@ -104,14 +112,21 @@ func (c *CommentsAddCmd) Run(client *api.Client) error {
 type CommentsUpdateCmd struct {
 	IssueKey  string `arg:"" help:"Issue key (e.g., PROJ-123)"`
 	CommentID string `arg:"" help:"Comment ID"`
-	Text      string `arg:"" help:"New comment text (supports markdown and @mentions)"`
+	Text      string `arg:"" help:"New comment text (supports markdown, @mentions, and inline images (!filename!))"`
 	JSON      bool   `short:"j" help:"Output as JSON"`
 }
 
 func (c *CommentsUpdateCmd) Run(client *api.Client) error {
-	adfBody := adf.MarkdownToADFWithMentions(c.Text, newMentionResolver(client))
+	var comment *api.Comment
+	var err error
 
-	comment, err := client.UpdateComment(c.IssueKey, c.CommentID, adfBody)
+	if adf.ContainsInlineImages(c.Text) {
+		wikiBody := adf.MarkdownToWiki(c.Text)
+		comment, err = client.UpdateCommentWiki(c.IssueKey, c.CommentID, wikiBody)
+	} else {
+		adfBody := adf.MarkdownToADFWithMentions(c.Text, newMentionResolver(client))
+		comment, err = client.UpdateComment(c.IssueKey, c.CommentID, adfBody)
+	}
 	if err != nil {
 		return err
 	}

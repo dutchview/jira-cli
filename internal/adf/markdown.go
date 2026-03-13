@@ -11,6 +11,8 @@ import (
 type MentionResolver func(name string) (accountID, displayName string, found bool)
 
 var (
+	inlineImageRe = regexp.MustCompile(`!\w[\w\-\.]+\.\w+(\|[^!]+)?!`)
+
 	headingRe    = regexp.MustCompile(`^(#{1,6})\s+(.+)$`)
 	bulletRe     = regexp.MustCompile(`^[-*]\s+`)
 	orderedRe    = regexp.MustCompile(`^\d+\.\s+`)
@@ -21,6 +23,12 @@ var (
 	// mentionBoundary characters that cannot be part of a display name.
 	mentionBoundary = "@,;!?:()[]{}#*`\n"
 )
+
+// ContainsInlineImages returns true if the text contains Jira wiki-style
+// inline image references like !filename.png! or !filename.png|width=720!.
+func ContainsInlineImages(text string) bool {
+	return inlineImageRe.MatchString(text)
+}
 
 // MarkdownToADF converts markdown-formatted text to an ADF document.
 func MarkdownToADF(text string) map[string]interface{} {

@@ -266,6 +266,63 @@ func (c *Client) UpdateIssue(issueKey string, fields map[string]interface{}) err
 	return err
 }
 
+// UpdateIssueWiki updates an issue using the v2 REST API, which accepts wiki markup
+// for text fields like description. This is needed for inline image support (!filename!).
+func (c *Client) UpdateIssueWiki(issueKey string, fields map[string]interface{}) error {
+	payload := map[string]interface{}{"fields": fields}
+	jsonBody, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshaling request: %w", err)
+	}
+
+	_, err = c.doRequest("PUT", "/rest/api/2/issue/"+issueKey, bytes.NewReader(jsonBody))
+	return err
+}
+
+// CreateIssueWiki creates an issue using the v2 REST API, which accepts wiki markup
+// for text fields like description. This is needed for inline image support (!filename!).
+func (c *Client) CreateIssueWiki(projectKey, summary, issueType string, description string, priority, assignee string, labels []string, dueDate string) (*Issue, error) {
+	fields := map[string]interface{}{
+		"project":   map[string]string{"key": projectKey},
+		"summary":   summary,
+		"issuetype": map[string]string{"name": issueType},
+	}
+
+	if description != "" {
+		fields["description"] = description
+	}
+	if priority != "" {
+		fields["priority"] = map[string]string{"name": priority}
+	}
+	if assignee != "" {
+		fields["assignee"] = map[string]string{"accountId": assignee}
+	}
+	if len(labels) > 0 {
+		fields["labels"] = labels
+	}
+	if dueDate != "" {
+		fields["duedate"] = dueDate
+	}
+
+	payload := map[string]interface{}{"fields": fields}
+	jsonBody, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling request: %w", err)
+	}
+
+	body, err := c.doRequest("POST", "/rest/api/2/issue", bytes.NewReader(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+
+	var issue Issue
+	if err := json.Unmarshal(body, &issue); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+
+	return &issue, nil
+}
+
 func (c *Client) DeleteIssue(issueKey string, deleteSubtasks bool) error {
 	endpoint := fmt.Sprintf("/rest/api/3/issue/%s?deleteSubtasks=%t", issueKey, deleteSubtasks)
 	_, err := c.doRequest("DELETE", endpoint, nil)
@@ -389,6 +446,54 @@ func (c *Client) UpdateComment(issueKey, commentID string, adfBody map[string]in
 	}
 
 	body, err := c.doRequest("PUT", fmt.Sprintf("/rest/api/3/issue/%s/comment/%s", issueKey, commentID), bytes.NewReader(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+
+	var comment Comment
+	if err := json.Unmarshal(body, &comment); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+
+	return &comment, nil
+}
+
+// AddCommentWiki adds a comment using the v2 REST API, which accepts wiki markup
+// as a plain string body. This is needed for inline image support (!filename!).
+func (c *Client) AddCommentWiki(issueKey string, wikiBody string) (*Comment, error) {
+	payload := map[string]interface{}{
+		"body": wikiBody,
+	}
+	jsonBody, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling request: %w", err)
+	}
+
+	body, err := c.doRequest("POST", fmt.Sprintf("/rest/api/2/issue/%s/comment", issueKey), bytes.NewReader(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+
+	var comment Comment
+	if err := json.Unmarshal(body, &comment); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+
+	return &comment, nil
+}
+
+// UpdateCommentWiki updates a comment using the v2 REST API, which accepts wiki markup
+// as a plain string body. This is needed for inline image support (!filename!).
+func (c *Client) UpdateCommentWiki(issueKey, commentID string, wikiBody string) (*Comment, error) {
+	payload := map[string]interface{}{
+		"body": wikiBody,
+	}
+	jsonBody, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling request: %w", err)
+	}
+
+	body, err := c.doRequest("PUT", fmt.Sprintf("/rest/api/2/issue/%s/comment/%s", issueKey, commentID), bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
 	}

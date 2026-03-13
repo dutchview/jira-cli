@@ -12,7 +12,7 @@ type AttachmentsCmd struct {
 
 type AttachmentsAddCmd struct {
 	IssueKey string `arg:"" help:"Issue key (e.g., PROJ-123)"`
-	FilePath string `arg:"" help:"Path to file to attach"`
+	FilePath string `arg:"" help:"Path to file to attach. After attaching, use !filename! in descriptions/comments to embed inline"`
 	Filename string `help:"Display name for the attachment (defaults to file's basename)"`
 	JSON     bool   `short:"j" help:"Output as JSON"`
 }

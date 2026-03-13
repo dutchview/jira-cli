@@ -123,6 +123,23 @@ Descriptions and comments support Markdown, which is automatically converted to 
 - Tables (pipe syntax)
 - Horizontal rules (`---`)
 
+### Inline Images
+
+To embed attached images inline in descriptions or comments, first attach the file, then reference it using `!filename!` syntax:
+
+```bash
+# 1. Attach the image
+jira attachments add ED-123 screenshot.png
+
+# 2. Reference it in description or comment
+jira issues update ED-123 --description "## Screenshot\n\n!screenshot.png!"
+
+# With width option
+jira issues update ED-123 --description "!screenshot.png|width=720!"
+```
+
+When inline images are detected, the CLI automatically uses JIRA's wiki markup renderer (API v2) which supports embedded attachments.
+
 ### @Mentions
 
 Use `@Display Name` in descriptions and comments to mention JIRA users. The CLI resolves display names to JIRA account IDs automatically via user search. Mentions are rendered as proper JIRA mention nodes in the Atlassian Document Format.

@@ -213,7 +213,7 @@ type IssuesCreateCmd struct {
 	Project     string `short:"p" required:"" help:"Project key (e.g., ED)"`
 	Type        string `short:"t" default:"Task" help:"Issue type (Bug, Task, Story, etc.)"`
 	Summary     string `short:"s" required:"" help:"Issue summary/title"`
-	Description string `short:"d" help:"Issue description (supports markdown and @mentions)"`
+	Description string `short:"d" help:"Issue description (supports markdown, @mentions, and inline images (!filename!))"`
 	Priority    string `help:"Priority (Highest, High, Medium, Low, Lowest)"`
 	Assignee    string `short:"a" help:"Assignee account ID"`
 	Labels      string `short:"l" help:"Comma-separated labels"`
@@ -222,11 +222,6 @@ type IssuesCreateCmd struct {
 }
 
 func (c *IssuesCreateCmd) Run(client *api.Client) error {
-	var description map[string]interface{}
-	if c.Description != "" {
-		description = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
-	}
-
 	var labels []string
 	if c.Labels != "" {
 		labels = strings.Split(c.Labels, ",")
@@ -235,7 +230,20 @@ func (c *IssuesCreateCmd) Run(client *api.Client) error {
 		}
 	}
 
-	issue, err := client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels, c.DueDate)
+	var issue *api.Issue
+	var err error
+
+	if c.Description != "" && adf.ContainsInlineImages(c.Description) {
+		// Use v2 API with wiki markup for inline image support
+		wikiDesc := adf.MarkdownToWiki(c.Description)
+		issue, err = client.CreateIssueWiki(c.Project, c.Summary, c.Type, wikiDesc, c.Priority, c.Assignee, labels, c.DueDate)
+	} else {
+		var description map[string]interface{}
+		if c.Description != "" {
+			description = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
+		}
+		issue, err = client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels, c.DueDate)
+	}
 	if err != nil {
 		return err
 	}
@@ -256,7 +264,7 @@ func (c *IssuesCreateCmd) Run(client *api.Client) error {
 type IssuesUpdateCmd struct {
 	IssueKey    string `arg:"" help:"Issue key (e.g., PROJ-123)"`
 	Summary     string `short:"s" help:"New summary"`
-	Description string `short:"d" help:"New description (supports markdown and @mentions)"`
+	Description string `short:"d" help:"New description (supports markdown, @mentions, and inline images (!filename!))"`
 	Priority    string `help:"New priority"`
 	Assignee    string `short:"a" help:"New assignee account ID"`
 	Unassign    bool   `help:"Remove assignee"`
@@ -271,8 +279,14 @@ func (c *IssuesUpdateCmd) Run(client *api.Client) error {
 	if c.Summary != "" {
 		fields["summary"] = c.Summary
 	}
+	useWiki := c.Description != "" && adf.ContainsInlineImages(c.Description)
+
 	if c.Description != "" {
-		fields["description"] = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
+		if useWiki {
+			fields["description"] = adf.MarkdownToWiki(c.Description)
+		} else {
+			fields["description"] = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
+		}
 	}
 	if c.Priority != "" {
 		fields["priority"] = map[string]string{"name": c.Priority}
@@ -299,7 +313,13 @@ func (c *IssuesUpdateCmd) Run(client *api.Client) error {
 		return fmt.Errorf("no fields to update (use --summary, --description, --priority, --assignee, --unassign, --labels, or --due-date)")
 	}
 
-	if err := client.UpdateIssue(c.IssueKey, fields); err != nil {
+	var err error
+	if useWiki {
+		err = client.UpdateIssueWiki(c.IssueKey, fields)
+	} else {
+		err = client.UpdateIssue(c.IssueKey, fields)
+	}
+	if err != nil {
 		return err
 	}
 
