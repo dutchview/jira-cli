@@ -15,8 +15,9 @@ type Config struct {
 	APIToken string
 }
 
-// ConfigLocations returns the list of config file locations that are checked
-// in order of priority (first found wins).
+// ConfigLocations returns config file locations in order of increasing priority
+// (lowest priority first). All existing files are loaded and merged, with
+// later entries overriding earlier ones.
 func ConfigLocations() []string {
 	var locations []string
 
@@ -25,24 +26,37 @@ func ConfigLocations() []string {
 		locations = append(locations, filepath.Join(homeDir, ".config", "jira", ".env"))
 	}
 
+	locations = append(locations, ".env") // Current directory (highest priority)
+
 	return locations
 }
 
 // Load loads configuration from environment variables and optional .env files.
 // The configFile parameter allows specifying a custom config file path.
-// If empty, the default location ~/.config/jira/.env is checked.
+// If empty, all default locations are loaded and merged in priority order:
+//  1. ~/.config/jira/.env  (base config)
+//  2. .env in current directory (overrides base config if present)
 //
-// Environment variables always take precedence over file values.
+// OS environment variables always take precedence over file values.
 func Load(configFile string) (*Config, error) {
 	if configFile != "" {
 		if err := godotenv.Load(configFile); err != nil {
 			return nil, fmt.Errorf("failed to load config file %s: %w", configFile, err)
 		}
 	} else {
+		// Read all files into a merged map (later files override earlier ones)
+		merged := make(map[string]string)
 		for _, loc := range ConfigLocations() {
-			if _, err := os.Stat(loc); err == nil {
-				_ = godotenv.Load(loc)
-				break
+			if fileEnv, err := godotenv.Read(loc); err == nil {
+				for k, v := range fileEnv {
+					merged[k] = v
+				}
+			}
+		}
+		// Apply merged values — OS environment variables take precedence
+		for k, v := range merged {
+			if os.Getenv(k) == "" {
+				os.Setenv(k, v)
 			}
 		}
 	}
