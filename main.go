@@ -10,7 +10,7 @@ import (
 	"github.com/mauricejumelet/jira-cli/internal/config"
 )
 
-var version = "0.3.0"
+var version = "0.4.1"
 
 var CLI struct {
 	// Global flags

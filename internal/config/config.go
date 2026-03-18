@@ -18,9 +18,7 @@ type Config struct {
 // ConfigLocations returns the list of config file locations that are checked
 // in order of priority (first found wins).
 func ConfigLocations() []string {
-	locations := []string{
-		".env", // Current directory
-	}
+	var locations []string
 
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
@@ -32,9 +30,7 @@ func ConfigLocations() []string {
 
 // Load loads configuration from environment variables and optional .env files.
 // The configFile parameter allows specifying a custom config file path.
-// If empty, the default locations are checked in order:
-//  1. .env in current directory
-//  2. ~/.config/jira/.env
+// If empty, the default location ~/.config/jira/.env is checked.
 //
 // Environment variables always take precedence over file values.
 func Load(configFile string) (*Config, error) {
