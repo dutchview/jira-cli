@@ -159,12 +159,12 @@ This repository includes a [Claude Code](https://claude.com/claude-code) skill t
 
 #### Option A: Quick install (download ZIP)
 
-1. [Download the skill as a ZIP](https://github.com/dutchview/jira-cli/releases/latest/download/claude-skill.zip)
-2. Unzip and move the `claude-skill` folder to your Claude Code skills directory:
-   ```bash
-   unzip claude-skill.zip -d ~/.claude/skills/jira
+1. [Download jira-skill.zip](https://github.com/dutchview/jira-cli/releases/latest/download/jira-skill.zip)
+2. Open Claude Code and type:
    ```
-3. Restart Claude Code.
+   Look in my Downloads folder for a skill called jira-skill and install it
+   ```
+3. Claude will find the ZIP, extract it, and install it to the right location for you.
 
 #### Option B: Clone the repository
 
