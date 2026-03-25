@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
-	"github.com/mauricejumelet/jira-cli/cmd"
-	"github.com/mauricejumelet/jira-cli/internal/api"
-	"github.com/mauricejumelet/jira-cli/internal/config"
+	"github.com/dutchview/jira-cli/cmd"
+	"github.com/dutchview/jira-cli/internal/api"
+	"github.com/dutchview/jira-cli/internal/config"
 )
 
 var version = "0.4.2"

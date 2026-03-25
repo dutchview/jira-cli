@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauricejumelet/jira-cli/internal/adf"
-	"github.com/mauricejumelet/jira-cli/internal/api"
+	"github.com/dutchview/jira-cli/internal/adf"
+	"github.com/dutchview/jira-cli/internal/api"
 )
 
 func printJSON(v interface{}) error {

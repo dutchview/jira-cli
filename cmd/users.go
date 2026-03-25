@@ -5,7 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/mauricejumelet/jira-cli/internal/api"
+	"github.com/dutchview/jira-cli/internal/api"
 )
 
 type UsersCmd struct {

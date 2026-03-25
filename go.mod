@@ -1,4 +1,4 @@
-module github.com/mauricejumelet/jira-cli
+module github.com/dutchview/jira-cli
 
 go 1.25.0
 

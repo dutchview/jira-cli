@@ -24,4 +24,4 @@ Reads from `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN` env vars or `~/.confi
 
 ## Release
 
-GoReleaser with Homebrew tap at `mjumelet/homebrew-tap`. Tag with `v*` to trigger release.
+GoReleaser with Homebrew tap at `dutchview/homebrew-tap`. Tag with `v*` to trigger release.

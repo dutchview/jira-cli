@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mauricejumelet/jira-cli/internal/config"
+	"github.com/dutchview/jira-cli/internal/config"
 )
 
 type Client struct {

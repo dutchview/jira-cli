@@ -7,14 +7,14 @@ A command-line interface for Jira Cloud, built in Go.
 ### Homebrew
 
 ```bash
-brew tap mjumelet/tap
+brew tap dutchview/tap
 brew install jira
 ```
 
 ### From source
 
 ```bash
-go install github.com/mauricejumelet/jira-cli@latest
+go install github.com/dutchview/jira-cli@latest
 ```
 
 ## Configuration
@@ -151,6 +151,36 @@ jira comments add ED-123 "Hey @John Smith, can you review this?"
 # Mention in a description
 jira issues create -p ED -t Task -s "Review needed" -d "Assigned to @Jane Doe for review"
 ```
+
+## Claude Code Skill
+
+This repository includes a [Claude Code](https://claude.com/claude-code) skill that enables Claude to interact with JIRA directly from your terminal. The skill provides full issue management, commenting, attachments, and JQL search capabilities.
+
+### Installing the Skill
+
+1. Clone this repository (or ensure you have a local copy):
+   ```bash
+   git clone https://github.com/dutchview/jira-cli.git
+   ```
+
+2. Create a symlink from the skill directory to your Claude Code skills folder:
+   ```bash
+   mkdir -p ~/.claude/skills
+   ln -s /path/to/jira-cli/claude-skill ~/.claude/skills/jira
+   ```
+
+3. Restart Claude Code. The skill will be automatically detected and available when you ask Claude to work with JIRA issues.
+
+### What the Skill Provides
+
+- Search, create, update, and delete JIRA issues
+- Manage comments and attachments
+- Transition issue statuses
+- Full JQL query support
+- Markdown-to-ADF conversion for descriptions and comments
+- User mentions with automatic account ID resolution
+
+The skill requires the `jira` CLI to be installed (see [Installation](#installation) above) and configured with your JIRA credentials.
 
 ## License
 

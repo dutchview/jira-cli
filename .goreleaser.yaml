@@ -27,12 +27,12 @@ archives:
 
 brews:
   - repository:
-      owner: mjumelet
+      owner: dutchview
       name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
     directory: Formula
     name: jira
-    homepage: "https://github.com/mjumelet/jira-cli"
+    homepage: "https://github.com/dutchview/jira-cli"
     description: "Command-line interface for Jira Cloud"
     license: "MIT"
     install: |
