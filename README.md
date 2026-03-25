@@ -2,7 +2,23 @@
 
 A command-line interface for Jira Cloud, built in Go.
 
-## Installation
+## Quick Start with Claude Code
+
+The fastest way to get everything set up. Open [Claude Code](https://claude.com/claude-code) and paste:
+
+```
+Follow the full installation guide at https://github.com/dutchview/jira-cli to set up
+the jira CLI on my machine. Install Homebrew if I don't have it, install the CLI,
+download and install the Claude Code skill from the latest release, and then create
+the .env configuration file — ask me for my email and API token. The JIRA base URL
+for Dutchview is https://dutchview.atlassian.net
+```
+
+Claude will walk you through the entire setup: installing Homebrew (if needed), the CLI, the skill, and configuring your credentials.
+
+> You'll need a JIRA API token. Get one at: https://id.atlassian.com/manage-profile/security/api-tokens
+
+## Manual Installation
 
 ### Homebrew
 
@@ -18,53 +34,24 @@ go install github.com/dutchview/jira-cli@latest
 
 ### Claude Code Skill
 
-This CLI also ships with a [Claude Code](https://claude.com/claude-code) skill that enables Claude to interact with JIRA directly from your terminal.
+This CLI ships with a Claude Code skill for JIRA integration. [Download jira-skill.zip](https://github.com/dutchview/jira-cli/releases/latest/download/jira-skill.zip), then extract it to your skills folder:
 
-#### Option A: Quick install (download ZIP)
+```bash
+mkdir -p ~/.claude/skills
+unzip jira-skill.zip -d ~/.claude/skills/jira
+```
 
-1. [Download jira-skill.zip](https://github.com/dutchview/jira-cli/releases/latest/download/jira-skill.zip)
-2. Open Claude Code and type:
-   ```
-   Look in my Downloads folder for a skill called jira-skill and install it
-   ```
-3. Claude will find the ZIP, extract it, and install it to the right location for you.
+### Configuration
 
-#### Option B: Clone the repository
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/dutchview/jira-cli.git
-   ```
-
-2. Create a symlink from the skill directory to your Claude Code skills folder:
-   ```bash
-   mkdir -p ~/.claude/skills
-   ln -s /path/to/jira-cli/claude-skill ~/.claude/skills/jira
-   ```
-
-3. Restart Claude Code. The skill will be automatically detected and available when you ask Claude to work with JIRA issues.
-
-## Configuration
-
-The CLI needs a `.env` file at `~/.config/jira/.env` with your JIRA credentials:
+Create a `.env` file at `~/.config/jira/.env`:
 
 ```
-JIRA_BASE_URL=https://yourcompany.atlassian.net
+JIRA_BASE_URL=https://dutchview.atlassian.net
 JIRA_EMAIL=you@example.com
 JIRA_API_TOKEN=your_api_token
 ```
 
-### Quick setup with Claude Code
-
-1. Get your API token at: https://id.atlassian.com/manage-profile/security/api-tokens
-2. Open Claude Code and type:
-   ```
-   Follow the configuration steps in https://github.com/dutchview/jira-cli to create
-   the .env file for the jira CLI. Ask me for each value.
-   ```
-3. Claude will ask you for your JIRA URL, email, and API token one at a time, and create the `.env` file for you.
-
-### Manual setup
+Get your API token at: https://id.atlassian.com/manage-profile/security/api-tokens
 
 Config is loaded from (in order):
 1. Environment variables
