@@ -16,6 +16,34 @@ brew install dutchview/tap/jira
 go install github.com/dutchview/jira-cli@latest
 ```
 
+### Claude Code Skill
+
+This CLI also ships with a [Claude Code](https://claude.com/claude-code) skill that enables Claude to interact with JIRA directly from your terminal.
+
+#### Option A: Quick install (download ZIP)
+
+1. [Download jira-skill.zip](https://github.com/dutchview/jira-cli/releases/latest/download/jira-skill.zip)
+2. Open Claude Code and type:
+   ```
+   Look in my Downloads folder for a skill called jira-skill and install it
+   ```
+3. Claude will find the ZIP, extract it, and install it to the right location for you.
+
+#### Option B: Clone the repository
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/dutchview/jira-cli.git
+   ```
+
+2. Create a symlink from the skill directory to your Claude Code skills folder:
+   ```bash
+   mkdir -p ~/.claude/skills
+   ln -s /path/to/jira-cli/claude-skill ~/.claude/skills/jira
+   ```
+
+3. Restart Claude Code. The skill will be automatically detected and available when you ask Claude to work with JIRA issues.
+
 ## Configuration
 
 Create a `.env` file at `~/.config/jira/.env`:
@@ -150,47 +178,6 @@ jira comments add ED-123 "Hey @John Smith, can you review this?"
 # Mention in a description
 jira issues create -p ED -t Task -s "Review needed" -d "Assigned to @Jane Doe for review"
 ```
-
-## Claude Code Skill
-
-This repository includes a [Claude Code](https://claude.com/claude-code) skill that enables Claude to interact with JIRA directly from your terminal. The skill provides full issue management, commenting, attachments, and JQL search capabilities.
-
-### Installing the Skill
-
-#### Option A: Quick install (download ZIP)
-
-1. [Download jira-skill.zip](https://github.com/dutchview/jira-cli/releases/latest/download/jira-skill.zip)
-2. Open Claude Code and type:
-   ```
-   Look in my Downloads folder for a skill called jira-skill and install it
-   ```
-3. Claude will find the ZIP, extract it, and install it to the right location for you.
-
-#### Option B: Clone the repository
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/dutchview/jira-cli.git
-   ```
-
-2. Create a symlink from the skill directory to your Claude Code skills folder:
-   ```bash
-   mkdir -p ~/.claude/skills
-   ln -s /path/to/jira-cli/claude-skill ~/.claude/skills/jira
-   ```
-
-3. Restart Claude Code. The skill will be automatically detected and available when you ask Claude to work with JIRA issues.
-
-### What the Skill Provides
-
-- Search, create, update, and delete JIRA issues
-- Manage comments and attachments
-- Transition issue statuses
-- Full JQL query support
-- Markdown-to-ADF conversion for descriptions and comments
-- User mentions with automatic account ID resolution
-
-The skill requires the `jira` CLI to be installed (see [Installation](#installation) above) and configured with your JIRA credentials.
 
 ## License
 
