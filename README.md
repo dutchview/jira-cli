@@ -46,7 +46,7 @@ This CLI also ships with a [Claude Code](https://claude.com/claude-code) skill t
 
 ## Configuration
 
-Create a `.env` file at `~/.config/jira/.env`:
+The CLI needs a `.env` file at `~/.config/jira/.env` with your JIRA credentials:
 
 ```
 JIRA_BASE_URL=https://yourcompany.atlassian.net
@@ -54,7 +54,17 @@ JIRA_EMAIL=you@example.com
 JIRA_API_TOKEN=your_api_token
 ```
 
-Get your API token at: https://id.atlassian.com/manage-profile/security/api-tokens
+### Quick setup with Claude Code
+
+1. Get your API token at: https://id.atlassian.com/manage-profile/security/api-tokens
+2. Open Claude Code and type:
+   ```
+   Follow the configuration steps in https://github.com/dutchview/jira-cli to create
+   the .env file for the jira CLI. Here is my token: "YOUR_TOKEN_HERE"
+   ```
+3. Claude will create the `.env` file in the right location for you.
+
+### Manual setup
 
 Config is loaded from (in order):
 1. Environment variables
