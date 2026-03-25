@@ -7,8 +7,7 @@ A command-line interface for Jira Cloud, built in Go.
 ### Homebrew
 
 ```bash
-brew tap dutchview/tap
-brew install jira
+brew install dutchview/tap/jira
 ```
 
 ### From source
@@ -158,7 +157,18 @@ This repository includes a [Claude Code](https://claude.com/claude-code) skill t
 
 ### Installing the Skill
 
-1. Clone this repository (or ensure you have a local copy):
+#### Option A: Quick install (download ZIP)
+
+1. [Download the skill as a ZIP](https://github.com/dutchview/jira-cli/releases/latest/download/claude-skill.zip)
+2. Unzip and move the `claude-skill` folder to your Claude Code skills directory:
+   ```bash
+   unzip claude-skill.zip -d ~/.claude/skills/jira
+   ```
+3. Restart Claude Code.
+
+#### Option B: Clone the repository
+
+1. Clone this repository:
    ```bash
    git clone https://github.com/dutchview/jira-cli.git
    ```
