@@ -60,9 +60,9 @@ JIRA_API_TOKEN=your_api_token
 2. Open Claude Code and type:
    ```
    Follow the configuration steps in https://github.com/dutchview/jira-cli to create
-   the .env file for the jira CLI. Here is my token: "YOUR_TOKEN_HERE"
+   the .env file for the jira CLI. Ask me for each value.
    ```
-3. Claude will create the `.env` file in the right location for you.
+3. Claude will ask you for your JIRA URL, email, and API token one at a time, and create the `.env` file for you.
 
 ### Manual setup
 
