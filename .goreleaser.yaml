@@ -29,7 +29,7 @@ brews:
   - repository:
       owner: dutchview
       name: homebrew-tap
-      token: "{{ .Env.GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
     name: jira
     homepage: "https://github.com/dutchview/jira-cli"
