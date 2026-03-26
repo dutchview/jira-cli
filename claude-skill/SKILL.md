@@ -1,6 +1,6 @@
 ---
 name: jira
-description: This skill enables interaction with JIRA Cloud for issue tracking. It should be used when the user wants to create, view, update, search, or comment on JIRA issues/tickets. Use this skill for any JIRA-related operations including listing projects, searching with JQL, transitioning issue statuses, managing comments, and uploading file attachments.
+description: This skill enables interaction with JIRA Cloud for issue tracking. It should be used when the user wants to create, view, update, search, or comment on JIRA issues/tickets. Use this skill for any JIRA-related operations including listing projects, searching with JQL, transitioning issue statuses, managing comments, uploading file attachments, and linking issues.
 ---
 
 # JIRA
@@ -121,6 +121,17 @@ jira comments add ED-123 "Here's the mockup:\n\n!mockup.jpg|width=600!"
 When `!filename!` patterns are detected, the CLI automatically uses JIRA's wiki markup renderer (API v2) which supports embedded attachment images. All other content without inline images continues to use the standard ADF/v3 pipeline.
 
 **Important:** The filename in `!filename!` must exactly match the attached file's name. Attach first, then reference.
+
+### Issue Links
+```bash
+jira links list ED-123                         # List links on an issue
+jira links list ED-123 --json                  # JSON output
+jira links add ED-123 ED-456 --type "3. Blocks"  # Link two issues
+jira links add ED-100 ED-200 --type "4. Duplicate"
+jira links delete 12345                        # Delete a link by ID
+jira links delete 12345 --force                # Skip confirmation
+jira links types                               # List available link types
+```
 
 ### Users
 ```bash
@@ -334,7 +345,35 @@ This JIRA instance uses numbered prefixes for link type names. Do NOT use standa
 | Duplicate | `4. Duplicate` | is duplicated by | duplicates |
 | Succeeding | `5. Succeeding` | preceeds | succeeds |
 
-**Note:** Issue linking is not yet available in the CLI. Use the JIRA web interface for linking issues.
+Use the link type **Name** column when creating links via `jira links add --type "..."`.
+
+### `jira links list <issue-key>`
+List all links on an issue.
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--json` | `-j` | Output as JSON |
+
+### `jira links add <inward-issue> <outward-issue>`
+Create a link between two issues.
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--type` | `-t` | Link type name (required, e.g., "3. Blocks") |
+
+### `jira links delete <link-id>`
+Delete an issue link.
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--force` | `-f` | Skip confirmation |
+
+### `jira links types`
+List all available link types.
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--json` | `-j` | Output as JSON |
 
 ## Common JQL Queries
 

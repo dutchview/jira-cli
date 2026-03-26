@@ -116,6 +116,25 @@ jira attachments add ED-123 ./screenshot.png
 jira attachments add ED-123 ./report.pdf --filename "Q4 Report.pdf"
 ```
 
+### Links
+
+```bash
+# List links on an issue
+jira links list ED-123
+jira links list ED-123 --json
+
+# Link two issues
+jira links add ED-123 ED-456 --type "Blocks"
+jira links add ED-100 ED-200 --type "Duplicate"
+
+# Delete a link (get ID from 'links list')
+jira links delete 12345
+jira links delete 12345 --force
+
+# List available link types
+jira links types
+```
+
 ### Projects
 
 ```bash

@@ -689,6 +689,76 @@ func (c *Client) GetAssignableUsers(projectKey string, maxResults int) ([]User, 
 	return users, nil
 }
 
+// --- Issue Link Operations ---
+
+type IssueLinkType struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Inward  string `json:"inward"`
+	Outward string `json:"outward"`
+}
+
+type IssueLink struct {
+	ID           string         `json:"id"`
+	Type         *IssueLinkType `json:"type,omitempty"`
+	InwardIssue  *Issue         `json:"inwardIssue,omitempty"`
+	OutwardIssue *Issue         `json:"outwardIssue,omitempty"`
+}
+
+func (c *Client) GetIssueLinkTypes() ([]IssueLinkType, error) {
+	body, err := c.doRequest("GET", "/rest/api/3/issueLinkType", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		IssueLinkTypes []IssueLinkType `json:"issueLinkTypes"`
+	}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+
+	return resp.IssueLinkTypes, nil
+}
+
+func (c *Client) GetIssueLinks(issueKey string) ([]IssueLink, error) {
+	body, err := c.doRequest("GET", "/rest/api/3/issue/"+issueKey+"?fields=issuelinks", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp struct {
+		Fields struct {
+			IssueLinks []IssueLink `json:"issuelinks"`
+		} `json:"fields"`
+	}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+
+	return resp.Fields.IssueLinks, nil
+}
+
+func (c *Client) CreateIssueLink(linkTypeName, inwardIssueKey, outwardIssueKey string) error {
+	payload := map[string]interface{}{
+		"type":         map[string]string{"name": linkTypeName},
+		"inwardIssue":  map[string]string{"key": inwardIssueKey},
+		"outwardIssue": map[string]string{"key": outwardIssueKey},
+	}
+	jsonBody, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshaling request: %w", err)
+	}
+
+	_, err = c.doRequest("POST", "/rest/api/3/issueLink", bytes.NewReader(jsonBody))
+	return err
+}
+
+func (c *Client) DeleteIssueLink(linkID string) error {
+	_, err := c.doRequest("DELETE", "/rest/api/3/issueLink/"+linkID, nil)
+	return err
+}
+
 // --- Metadata Operations ---
 
 func (c *Client) GetIssueTypes() ([]IssueType, error) {

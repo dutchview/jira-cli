@@ -10,7 +10,7 @@ import (
 	"github.com/dutchview/jira-cli/internal/config"
 )
 
-var version = "0.4.2"
+var version = "0.5.0"
 
 var CLI struct {
 	// Global flags
@@ -21,6 +21,7 @@ var CLI struct {
 	Comments    cmd.CommentsCmd    `cmd:"" help:"Manage comments"`
 	Attachments cmd.AttachmentsCmd `cmd:"" help:"Manage attachments"`
 	Projects    cmd.ProjectsCmd    `cmd:"" help:"Manage projects"`
+	Links       cmd.LinksCmd       `cmd:"" help:"Manage issue links"`
 	Users       cmd.UsersCmd       `cmd:"" help:"Manage users"`
 	Configure   ConfigureCmd       `cmd:"" help:"Show configuration help"`
 }

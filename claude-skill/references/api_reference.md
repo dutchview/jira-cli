@@ -33,6 +33,15 @@ https://{your-domain}.atlassian.net
 | GET | `/rest/api/3/issue/{issueIdOrKey}/transitions` | Get available transitions |
 | POST | `/rest/api/3/issue/{issueIdOrKey}/transitions` | Transition an issue |
 
+### Issue Links
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/rest/api/3/issueLinkType` | List available link types |
+| GET | `/rest/api/3/issue/{issueIdOrKey}?fields=issuelinks` | Get links on an issue |
+| POST | `/rest/api/3/issueLink` | Create an issue link |
+| DELETE | `/rest/api/3/issueLink/{linkId}` | Delete an issue link |
+
 ### Comments
 
 | Method | Endpoint | Description |
