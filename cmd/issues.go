@@ -17,19 +17,21 @@ type IssuesCmd struct {
 	Update     IssuesUpdateCmd     `cmd:"" help:"Update an issue"`
 	Delete     IssuesDeleteCmd     `cmd:"" help:"Delete an issue"`
 	Transition IssuesTransitionCmd `cmd:"" help:"Transition an issue to a new status"`
+	Parent     IssuesParentCmd     `cmd:"" help:"Manage an issue's parent (the 'Epic' for stories under an epic — same field)"`
 }
 
 // --- Search ---
 
 type IssuesSearchCmd struct {
-	JQL       string `arg:"" optional:"" help:"JQL query string"`
-	Project   string `short:"p" help:"Filter by project key"`
-	Status    string `short:"s" help:"Filter by status name"`
-	Assignee  string `short:"a" help:"Filter by assignee (account ID or 'currentUser()')"`
-	MyIssues  bool   `short:"m" help:"Show only issues assigned to current user"`
-	Type      string `short:"t" help:"Filter by issue type (Bug, Task, Story, etc.)"`
-	Max       int    `short:"n" default:"50" help:"Maximum results"`
-	JSON      bool   `short:"j" help:"Output as JSON"`
+	JQL      string `arg:"" optional:"" help:"JQL query string"`
+	Project  string `short:"p" help:"Filter by project key"`
+	Status   string `short:"s" help:"Filter by status name"`
+	Assignee string `short:"a" help:"Filter by assignee (account ID or 'currentUser()')"`
+	MyIssues bool   `short:"m" help:"Show only issues assigned to current user"`
+	Type     string `short:"t" help:"Filter by issue type (Bug, Task, Story, etc.)"`
+	Parent   string `help:"Filter by parent issue key (in JIRA's UI, the 'Epic' for stories under an epic — same field)"`
+	Max      int    `short:"n" default:"50" help:"Maximum results"`
+	JSON     bool   `short:"j" help:"Output as JSON"`
 }
 
 func (c *IssuesSearchCmd) Run(client *api.Client) error {
@@ -51,6 +53,9 @@ func (c *IssuesSearchCmd) Run(client *api.Client) error {
 		}
 		if c.Type != "" {
 			parts = append(parts, fmt.Sprintf("issuetype = \"%s\"", c.Type))
+		}
+		if c.Parent != "" {
+			parts = append(parts, fmt.Sprintf("parent = %s", c.Parent))
 		}
 		if len(parts) == 0 {
 			parts = append(parts, "order by updated DESC")
@@ -167,6 +172,9 @@ func (c *IssuesGetCmd) Run(client *api.Client) error {
 	if issue.Fields.Project != nil {
 		fmt.Printf("Project: %s (%s)\n", issue.Fields.Project.Name, issue.Fields.Project.Key)
 	}
+	if issue.Fields.Parent != nil {
+		fmt.Printf("Parent: %s\n", issue.Fields.Parent.Key)
+	}
 	if len(issue.Fields.Labels) > 0 {
 		fmt.Printf("Labels: %s\n", strings.Join(issue.Fields.Labels, ", "))
 	}
@@ -218,6 +226,7 @@ type IssuesCreateCmd struct {
 	Assignee    string `short:"a" help:"Assignee account ID"`
 	Labels      string `short:"l" help:"Comma-separated labels"`
 	DueDate     string `help:"Due date (YYYY-MM-DD)"`
+	Parent      string `help:"Parent issue key (in JIRA's UI this is the 'Epic' for stories under epics — same field)"`
 	JSON        bool   `short:"j" help:"Output as JSON"`
 }
 
@@ -236,13 +245,13 @@ func (c *IssuesCreateCmd) Run(client *api.Client) error {
 	if c.Description != "" && adf.ContainsInlineImages(c.Description) {
 		// Use v2 API with wiki markup for inline image support
 		wikiDesc := adf.MarkdownToWiki(c.Description)
-		issue, err = client.CreateIssueWiki(c.Project, c.Summary, c.Type, wikiDesc, c.Priority, c.Assignee, labels, c.DueDate)
+		issue, err = client.CreateIssueWiki(c.Project, c.Summary, c.Type, wikiDesc, c.Priority, c.Assignee, labels, c.DueDate, c.Parent)
 	} else {
 		var description map[string]interface{}
 		if c.Description != "" {
 			description = adf.MarkdownToADFWithMentions(c.Description, newMentionResolver(client))
 		}
-		issue, err = client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels, c.DueDate)
+		issue, err = client.CreateIssue(c.Project, c.Summary, c.Type, description, c.Priority, c.Assignee, labels, c.DueDate, c.Parent)
 	}
 	if err != nil {
 		return err

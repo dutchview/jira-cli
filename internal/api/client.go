@@ -114,6 +114,7 @@ type IssueFields struct {
 	Labels      []string               `json:"labels,omitempty"`
 	Project     *Project               `json:"project,omitempty"`
 	Comment     *CommentPage           `json:"comment,omitempty"`
+	Parent      *Issue                 `json:"parent,omitempty"`
 }
 
 type Status struct {
@@ -213,7 +214,7 @@ func (c *Client) GetIssue(issueKey string, fields []string, expand []string) (*I
 	return &issue, nil
 }
 
-func (c *Client) CreateIssue(projectKey, summary, issueType string, description map[string]interface{}, priority, assignee string, labels []string, dueDate string) (*Issue, error) {
+func (c *Client) CreateIssue(projectKey, summary, issueType string, description map[string]interface{}, priority, assignee string, labels []string, dueDate, parentKey string) (*Issue, error) {
 	fields := map[string]interface{}{
 		"project":   map[string]string{"key": projectKey},
 		"summary":   summary,
@@ -234,6 +235,9 @@ func (c *Client) CreateIssue(projectKey, summary, issueType string, description 
 	}
 	if dueDate != "" {
 		fields["duedate"] = dueDate
+	}
+	if parentKey != "" {
+		fields["parent"] = map[string]string{"key": parentKey}
 	}
 
 	payload := map[string]interface{}{"fields": fields}
@@ -281,7 +285,7 @@ func (c *Client) UpdateIssueWiki(issueKey string, fields map[string]interface{})
 
 // CreateIssueWiki creates an issue using the v2 REST API, which accepts wiki markup
 // for text fields like description. This is needed for inline image support (!filename!).
-func (c *Client) CreateIssueWiki(projectKey, summary, issueType string, description string, priority, assignee string, labels []string, dueDate string) (*Issue, error) {
+func (c *Client) CreateIssueWiki(projectKey, summary, issueType string, description string, priority, assignee string, labels []string, dueDate, parentKey string) (*Issue, error) {
 	fields := map[string]interface{}{
 		"project":   map[string]string{"key": projectKey},
 		"summary":   summary,
@@ -302,6 +306,9 @@ func (c *Client) CreateIssueWiki(projectKey, summary, issueType string, descript
 	}
 	if dueDate != "" {
 		fields["duedate"] = dueDate
+	}
+	if parentKey != "" {
+		fields["parent"] = map[string]string{"key": parentKey}
 	}
 
 	payload := map[string]interface{}{"fields": fields}
