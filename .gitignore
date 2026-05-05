@@ -27,3 +27,11 @@ dist/
 
 # Claude Code local settings
 .claude/
+
+# Node (Sandcastle tooling)
+node_modules/
+.agents/
+.sandcastle/
+package.json
+package-lock.json
+skills-lock.json
