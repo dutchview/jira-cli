@@ -17,6 +17,13 @@ builds:
       - arm64
     ldflags:
       - -s -w -X main.version={{.Version}}
+    hooks:
+      # Ad-hoc code-sign macOS binaries. Apple Silicon (M-series) refuses to run
+      # unsigned arm64 Mach-O binaries and kills the process immediately. Because
+      # the release cross-compiles darwin builds on Linux, GoReleaser produces
+      # unsigned binaries, so we sign them in place with rcodesign before archiving.
+      post:
+        - cmd: sh -c 'if [ "{{ .Os }}" = "darwin" ]; then rcodesign sign "{{ .Path }}"; fi'
 
 archives:
   - format: tar.gz

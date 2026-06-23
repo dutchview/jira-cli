@@ -20,6 +20,17 @@ jobs:
         with:
           go-version: "1.25"
 
+      # rcodesign ad-hoc signs the macOS binaries so they run on Apple Silicon.
+      - name: Install rcodesign
+        run: |
+          version=0.29.0
+          asset=apple-codesign-${version}-x86_64-unknown-linux-musl
+          curl -fsSL -o /tmp/rcodesign.tar.gz \
+            "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F${version}/${asset}.tar.gz"
+          tar -xzf /tmp/rcodesign.tar.gz -C /tmp
+          sudo install "/tmp/${asset}/rcodesign" /usr/local/bin/rcodesign
+          rcodesign --version
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
